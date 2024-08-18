@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cubo 3D com Faces Coloridas</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <label>Yaw: <input type="range" id="yaw" min="-180" max="180" value="0"></label><br>
+        <label>Pitch: <input type="range" id="pitch" min="-180" max="180" value="0"></label><br>
+        <label>Roll: <input type="range" id="roll" min="-180" max="180" value="0"></label>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Criando a cena
+        const scene = new THREE.Scene();
+
+        // Criando a câmera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        // Criando o renderizador
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Criando materiais com cores diferentes para cada face do cubo
+        const materials = [
+            new THREE.MeshBasicMaterial({ color: 0xff0000 }), // Vermelho
+            new THREE.MeshBasicMaterial({ color: 0x00ff00 }), // Verde
+            new THREE.MeshBasicMaterial({ color: 0x0000ff }), // Azul
+            new THREE.MeshBasicMaterial({ color: 0xffff00 }), // Amarelo
+            new THREE.MeshBasicMaterial({ color: 0xff00ff }), // Magenta
+            new THREE.MeshBasicMaterial({ color: 0x00ffff })  // Ciano
+        ];
+
+        // Criando a geometria do cubo e aplicando os materiais coloridos
+        const geometry = new THREE.BoxGeometry();
+        const cube = new THREE.Mesh(geometry, materials);
+        scene.add(cube);
+
+        // Função para atualizar as rotações
+        function updateRotation() {
+            const yaw = document.getElementById('yaw').value;
+            const pitch = document.getElementById('pitch').value;
+            const roll = document.getElementById('roll').value;
+
+            cube.rotation.y = THREE.MathUtils.degToRad(yaw);
+            cube.rotation.x = THREE.MathUtils.degToRad(pitch);
+            cube.rotation.z = THREE.MathUtils.degToRad(roll);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/yaw?value=" + yaw.value, true);
+            xhr.send();
+            xhr.open("GET", "/pitch?value=" + pitch.value, true);
+            xhr.send();
+            xhr.open("GET", "/roll?value=" + roll.value, true);
+            xhr.send();
+        }
+        
+
+        // Adicionando evento aos sliders
+        document.getElementById('yaw').addEventListener('input', updateRotation);
+        document.getElementById('pitch').addEventListener('input', updateRotation);
+        document.getElementById('roll').addEventListener('input', updateRotation);
+
+        // Função de animação
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Ajusta o tamanho do renderizador e da câmera ao redimensionar a janela
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+
+    </script>
+</body>
+</html>
